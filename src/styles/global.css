@@ -159,3 +159,88 @@
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }
+
+/* Mermaid: 描画前と描画後は図として中央に置き、書式の誤りで描画できなかった場合だけコードとして表示する */
+.prose pre.mermaid {
+  display: flex;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: transparent;
+  font-family: var(--font-sans);
+}
+
+.prose pre.mermaid.mermaid-error {
+  display: block;
+  border: 1px solid var(--color-stone-200);
+  background-color: var(--color-stone-100);
+  color: var(--color-stone-700);
+  font-family: var(--font-mono);
+}
+
+.dark .prose pre.mermaid.mermaid-error {
+  border-color: var(--color-stone-800);
+  background-color: var(--color-stone-900);
+  color: var(--color-stone-300);
+}
+
+/* GitHub と同じ `> [!NOTE]` 記法の囲み */
+.prose .callout {
+  --callout: var(--color-sky-600);
+  margin-block: 1.5em;
+  padding: 0.9em 1.1em;
+  border-left: 3px solid var(--callout);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background-color: color-mix(in oklab, var(--callout) 7%, transparent);
+}
+
+.prose .callout > :first-child {
+  margin-top: 0;
+}
+
+.prose .callout > :last-child {
+  margin-bottom: 0;
+}
+
+.prose .callout-title {
+  margin-bottom: 0.3em;
+  color: var(--callout);
+  font-size: 0.9em;
+  font-weight: 700;
+}
+
+.prose .callout-tip {
+  --callout: var(--color-emerald-600);
+}
+
+.prose .callout-important {
+  --callout: var(--color-violet-600);
+}
+
+.prose .callout-warning {
+  --callout: var(--color-amber-600);
+}
+
+.prose .callout-caution {
+  --callout: var(--color-red-600);
+}
+
+.dark .prose .callout {
+  --callout: var(--color-sky-400);
+}
+
+.dark .prose .callout-tip {
+  --callout: var(--color-emerald-400);
+}
+
+.dark .prose .callout-important {
+  --callout: var(--color-violet-400);
+}
+
+.dark .prose .callout-warning {
+  --callout: var(--color-amber-400);
+}
+
+.dark .prose .callout-caution {
+  --callout: var(--color-red-400);
+}

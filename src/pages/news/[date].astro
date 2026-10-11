@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import Calendar from '../../components/Calendar.astro';
 import CategoryBadge from '../../components/CategoryBadge.astro';
+import Mermaid from '../../components/Mermaid.astro';
 import PrevNext from '../../components/PrevNext.astro';
 import Toc from '../../components/Toc.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -33,7 +34,7 @@ const title = formatDateJa(entry.dateKey);
     <div class="min-w-0">
       <article data-pagefind-body>
         <header class="mb-8">
-          <p class="text-xs font-semibold tracking-wider text-sky-700 dark:text-sky-400">TECH DAILY BRIEFING</p>
+          <p class="text-xs font-semibold tracking-wider text-sky-700 dark:text-sky-400">TECH BRIEFING</p>
           <h1
             class="mt-2 text-[1.75rem] leading-tight font-bold text-stone-900 sm:text-[2rem] dark:text-stone-50"
             data-pagefind-meta="title"
@@ -75,6 +76,7 @@ const title = formatDateJa(entry.dateKey);
         <div class="prose max-w-none prose-stone dark:prose-invert prose-headings:text-stone-900 prose-a:text-sky-700 dark:prose-headings:text-stone-50 dark:prose-a:text-sky-400">
           <Content />
         </div>
+        <Mermaid />
       </article>
 
       <PrevNext prev={prev} next={next} />

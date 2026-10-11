@@ -1,0 +1,83 @@
+<script>
+  // 記事内の Mermaid 図を描画する。図があるページだけ mermaid を読み込み、テーマ切り替え時に描き直す。
+  // 読み込みや描画に失敗した図は、エラー画像ではなく元のコードを表示する
+  const blocks = [...document.querySelectorAll<HTMLElement>('pre.mermaid')];
+  const sources = blocks.map((el) => el.textContent ?? '');
+
+  const showSource = (el: HTMLElement, i: number) => {
+    el.textContent = sources[i] ?? '';
+    el.classList.add('mermaid-error');
+  };
+
+  const mermaid =
+    blocks.length > 0
+      ? await import('mermaid')
+          .then((m) => m.default)
+          .catch((error: unknown) => {
+            console.error(error);
+            blocks.forEach(showSource);
+            return null;
+          })
+      : null;
+
+  // サイトの配色（Tailwind の sky / stone）に合わせる
+  const COLORS = {
+    light: { node: '#e0f2fe', border: '#0284c7', text: '#1c1917', line: '#78716c', label: '#fafaf9', plot: '#0284c7' },
+    dark: { node: '#082f49', border: '#38bdf8', text: '#f5f5f4', line: '#a8a29e', label: '#0c0a09', plot: '#38bdf8' },
+  };
+
+  if (mermaid) {
+    const render = async () => {
+      const dark = document.documentElement.classList.contains('dark');
+      const c = dark ? COLORS.dark : COLORS.light;
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        darkMode: dark,
+        fontFamily: getComputedStyle(document.body).fontFamily,
+        themeVariables: {
+          background: 'transparent',
+          primaryColor: c.node,
+          primaryBorderColor: c.border,
+          primaryTextColor: c.text,
+          secondaryColor: c.node,
+          tertiaryColor: c.node,
+          lineColor: c.line,
+          textColor: c.text,
+          edgeLabelBackground: c.label,
+          xyChart: {
+            backgroundColor: 'transparent',
+            titleColor: c.text,
+            xAxisLabelColor: c.text,
+            xAxisTitleColor: c.text,
+            xAxisLineColor: c.line,
+            xAxisTickColor: c.line,
+            yAxisLabelColor: c.text,
+            yAxisTitleColor: c.text,
+            yAxisLineColor: c.line,
+            yAxisTickColor: c.line,
+            plotColorPalette: c.plot,
+          },
+        },
+        xyChart: { width: 640, height: 320 },
+      });
+      for (const [i, el] of blocks.entries()) {
+        el.removeAttribute('data-processed');
+        el.classList.remove('mermaid-error');
+        el.textContent = sources[i] ?? '';
+        try {
+          await mermaid.run({ nodes: [el] });
+        } catch (error) {
+          console.error(error);
+          showSource(el, i);
+        }
+      }
+    };
+
+    await render();
+    new MutationObserver(() => void render()).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  }
+</script>
