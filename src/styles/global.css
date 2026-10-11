@@ -22,7 +22,7 @@
   }
 
   body {
-    line-height: 1.8;
+    line-height: 1.7;
     letter-spacing: 0.02em;
   }
 
@@ -61,18 +61,22 @@
 
 /* 記事本文 */
 .prose {
-  line-height: 1.95;
+  line-height: 1.8;
   overflow-wrap: anywhere;
 }
 
 .prose :where(p) {
-  margin-block: 1.1em;
+  margin-block: 0.75em;
+}
+
+.prose :where(li) {
+  margin-block: 0.25em;
 }
 
 /* 見出しの前は区切り線で間隔を取る。区切り線がない場合も同じ間隔になるよう余白を持たせる */
 .prose h2 {
-  margin-top: 3.5rem;
-  margin-bottom: 1.1rem;
+  margin-top: 2.75rem;
+  margin-bottom: 0.9rem;
   font-size: 1.5rem;
   line-height: 1.5;
   scroll-margin-top: 5rem;
@@ -84,12 +88,12 @@
 }
 
 .prose h3 {
-  margin-top: 2.2em;
+  margin-top: 1.75em;
   font-size: 1.125rem;
 }
 
 .prose hr {
-  margin-block: 3.5rem;
+  margin-block: 2.75rem;
   border-color: var(--color-stone-200);
 }
 
