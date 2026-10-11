@@ -1,0 +1,56 @@
+---
+import Calendar from '../components/Calendar.astro';
+import NewsCard from '../components/NewsCard.astro';
+import { CATEGORIES } from '../data/categories';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getNewsList } from '../lib/content';
+import { toMonthKey } from '../lib/date';
+import { categoryPath, path } from '../lib/url';
+
+const RECENT_DAYS = 14;
+
+const news = await getNewsList();
+const recent = news.slice(0, RECENT_DAYS);
+const dateKeys = new Set(news.map((n) => n.dateKey));
+const latestMonth = news[0] ? toMonthKey(news[0].dateKey) : undefined;
+---
+
+<BaseLayout>
+  <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
+    <div class="min-w-0">
+      <h1 class="mb-4 text-xs font-bold tracking-wider text-stone-500">最新のニュース</h1>
+      <div class="space-y-4">
+        {recent.map((entry) => (
+          <NewsCard entry={entry} />
+        ))}
+      </div>
+      {news.length > RECENT_DAYS && (
+        <a
+          href={path('archive')}
+          class="mt-6 flex items-center justify-center gap-1 rounded-xl border border-dashed border-stone-300 p-4 text-sm font-medium text-stone-600 transition-colors hover:border-sky-500 hover:text-sky-700 dark:border-stone-700 dark:text-stone-400 dark:hover:border-sky-400 dark:hover:text-sky-300"
+        >
+          それより前のニュースはアーカイブへ <span aria-hidden="true">→</span>
+        </a>
+      )}
+    </div>
+
+    <aside class="space-y-8 lg:sticky lg:top-24 lg:self-start">
+      {latestMonth && <Calendar monthKey={latestMonth} dateKeys={dateKeys} />}
+      <section>
+        <h2 class="mb-3 text-xs font-bold tracking-wider text-stone-500">カテゴリ</h2>
+        <ul class="flex flex-wrap gap-1.5 lg:flex-col lg:gap-0">
+          {CATEGORIES.map((c) => (
+            <li>
+              <a
+                href={categoryPath(c.slug)}
+                class="block rounded-md border border-stone-200 px-2.5 py-1 text-[13px] text-stone-600 transition-colors hover:border-sky-300 hover:text-sky-700 lg:-mx-2.5 lg:border-0 lg:py-1 lg:leading-relaxed lg:hover:bg-stone-200/50 dark:border-stone-800 dark:text-stone-400 dark:hover:text-sky-300 lg:dark:hover:bg-stone-800/50"
+              >
+                {c.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </aside>
+  </div>
+</BaseLayout>

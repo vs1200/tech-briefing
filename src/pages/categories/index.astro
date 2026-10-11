@@ -1,0 +1,32 @@
+---
+import PageHeader from '../../components/PageHeader.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CATEGORIES } from '../../data/categories';
+import { getAllItems } from '../../lib/categories';
+import { categoryPath } from '../../lib/url';
+
+const items = await getAllItems();
+const counts = new Map(CATEGORIES.map((c) => [c.slug, items.filter((i) => i.categories.includes(c.slug)).length]));
+---
+
+<BaseLayout title="カテゴリ">
+  <PageHeader title="カテゴリ" description="ニュース 1 本ごとに 1〜3 個のカテゴリを付けています。" />
+  <ul class="grid gap-3 sm:grid-cols-2 sm:gap-4">
+    {CATEGORIES.map((c) => (
+      <li>
+        <a
+          href={categoryPath(c.slug)}
+          class="group block h-full rounded-xl border border-stone-200 bg-white p-5 transition hover:border-stone-300 hover:shadow-[0_2px_12px_-4px_rgb(0_0_0/0.08)] dark:border-stone-800 dark:bg-stone-900 dark:hover:border-stone-700"
+        >
+          <span class="flex items-baseline justify-between gap-3">
+            <span class="font-bold text-stone-900 transition-colors group-hover:text-sky-700 dark:text-stone-50 dark:group-hover:text-sky-300">
+              {c.name}
+            </span>
+            <span class="shrink-0 text-xs text-stone-400 tabular-nums">{counts.get(c.slug)} 本</span>
+          </span>
+          <span class="mt-1.5 block text-sm leading-relaxed text-stone-500 dark:text-stone-400">{c.description}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

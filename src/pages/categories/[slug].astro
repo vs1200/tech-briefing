@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import CategoryBadge from '../../components/CategoryBadge.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CATEGORIES, type Category } from '../../data/categories';
+import { getAllItems } from '../../lib/categories';
+import { formatDateJa, formatMonthJa } from '../../lib/date';
+import { groupByMonth } from '../../lib/news';
+import { newsPath } from '../../lib/url';
+
+export const getStaticPaths = (() =>
+  CATEGORIES.map((category) => ({ params: { slug: category.slug }, props: { category } }))) satisfies GetStaticPaths;
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const items = (await getAllItems()).filter((i) => i.categories.includes(category.slug));
+const months = groupByMonth(items);
+---
+
+<BaseLayout title={category.name} description={category.description}>
+  <div class="max-w-3xl">
+    <PageHeader
+      eyebrow="CATEGORY"
+      title={category.name}
+      description={`${category.description}（${items.length} 本）`}
+    />
+
+    {months.map(([monthKey, monthItems]) => (
+      <section class="mb-12">
+        <h2 class="mb-2 border-b border-stone-200 pb-2 text-sm font-bold text-stone-900 dark:border-stone-800 dark:text-stone-100">
+          {formatMonthJa(monthKey)}
+          <span class="ml-2 text-xs font-normal text-stone-400 tabular-nums">{monthItems.length} 本</span>
+        </h2>
+        <ul class="divide-y divide-stone-100 dark:divide-stone-800/70">
+          {monthItems.map((item) => (
+            <li class="py-3">
+              <a
+                href={`${newsPath(item.dateKey)}#${item.anchor ?? ''}`}
+                class="leading-relaxed text-stone-800 transition-colors hover:text-sky-700 dark:text-stone-200 dark:hover:text-sky-300"
+              >
+                {item.title}
+              </a>
+              <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <time datetime={item.dateKey} class="text-xs text-stone-400 tabular-nums">
+                  {formatDateJa(item.dateKey)}
+                </time>
+                {item.categories
+                  .filter((slug) => slug !== category.slug)
+                  .map((slug) => (
+                    <CategoryBadge slug={slug} />
+                  ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

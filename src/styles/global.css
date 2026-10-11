@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/noto-sans-jp';
+@plugin '@tailwindcss/typography';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Noto Sans JP Variable', 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+
+  /* 見出しは文節で改行する。約物の詰めは大きなページタイトルだけに適用する */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+    word-break: auto-phrase;
+  }
+
+  h1 {
+    font-feature-settings: 'palt';
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-sky-200);
+  }
+
+  .dark ::selection {
+    background-color: var(--color-sky-800);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-sky-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* 記事本文 */
+.prose {
+  line-height: 1.95;
+  overflow-wrap: anywhere;
+}
+
+.prose :where(p) {
+  margin-block: 1.1em;
+}
+
+/* 見出しの前は区切り線で間隔を取る。区切り線がない場合も同じ間隔になるよう余白を持たせる */
+.prose h2 {
+  margin-top: 3.5rem;
+  margin-bottom: 1.1rem;
+  font-size: 1.5rem;
+  line-height: 1.5;
+  scroll-margin-top: 5rem;
+}
+
+.prose hr + h2,
+.prose > h2:first-child {
+  margin-top: 0;
+}
+
+.prose h3 {
+  margin-top: 2.2em;
+  font-size: 1.125rem;
+}
+
+.prose hr {
+  margin-block: 3.5rem;
+  border-color: var(--color-stone-200);
+}
+
+.dark .prose hr {
+  border-color: var(--color-stone-800);
+}
+
+.prose a {
+  font-weight: 500;
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.15s;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* インラインコード: Typography 標準のバッククォートを消し、背景で示す */
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+.prose :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border-radius: 0.3rem;
+  background-color: var(--color-stone-100);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: var(--color-stone-800);
+}
+
+.prose pre {
+  border: 1px solid var(--color-stone-200);
+  border-radius: 0.5rem;
+  font-size: 0.85em;
+  line-height: 1.7;
+}
+
+.dark .prose pre {
+  border-color: var(--color-stone-800);
+}
+
+/* 表は狭い画面で横スクロールさせる */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  font-size: 0.9em;
+}
+
+.prose blockquote {
+  font-style: normal;
+  quotes: none;
+}
+
+/* Shiki のデュアルテーマ: ダークモード時に --shiki-dark の色へ切り替える */
+.dark .astro-code,
+.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}

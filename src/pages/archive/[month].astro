@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Calendar from '../../components/Calendar.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getNewsList, type NewsEntry } from '../../lib/content';
+import { formatMonthJa } from '../../lib/date';
+import { groupByMonth } from '../../lib/news';
+import { monthPath } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const months = groupByMonth(await getNewsList());
+  return months.map(([month, entries], i) => ({
+    params: { month },
+    props: { entries, newer: months[i - 1]?.[0], older: months[i + 1]?.[0] },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entries: NewsEntry[];
+  newer: string | undefined;
+  older: string | undefined;
+}
+
+const { entries, newer, older } = Astro.props;
+const { month } = Astro.params;
+const dateKeys = new Set(entries.map((n) => n.dateKey));
+const title = formatMonthJa(month);
+const monthLinkClass =
+  'text-sm font-medium text-sky-700 transition-colors hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300';
+---
+
+<BaseLayout title={title}>
+  <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
+    <div class="min-w-0">
+      <PageHeader eyebrow="ARCHIVE" title={title} description={`${entries.length} 日分のニュース`} />
+      <div class="space-y-4">
+        {entries.map((entry) => (
+          <NewsCard entry={entry} />
+        ))}
+      </div>
+    </div>
+
+    <aside class="space-y-3 lg:sticky lg:top-24 lg:self-start">
+      <Calendar monthKey={month} dateKeys={dateKeys} linkTitle={false} />
+      <nav class="flex justify-between px-1" aria-label="前後の月">
+        {older ? (
+          <a href={monthPath(older)} class={monthLinkClass}>
+            ← {formatMonthJa(older)}
+          </a>
+        ) : (
+          <span />
+        )}
+        {newer && (
+          <a href={monthPath(newer)} class={monthLinkClass}>
+            {formatMonthJa(newer)} →
+          </a>
+        )}
+      </nav>
+    </aside>
+  </div>
+</BaseLayout>

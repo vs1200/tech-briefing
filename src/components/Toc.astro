@@ -1,0 +1,70 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const headings = Astro.props.headings.filter((h) => h.depth === 2);
+---
+
+<nav aria-label="目次" class="text-[13px] leading-relaxed" data-toc>
+  <h2 class="mb-3 text-xs font-bold tracking-wider text-stone-500">目次</h2>
+  <ol class="border-l border-stone-200 dark:border-stone-800">
+    {headings.map((h) => (
+      <li>
+        <a
+          href={`#${h.slug}`}
+          class="-ml-px line-clamp-2 border-l-2 border-transparent py-1 pl-3 text-stone-500 transition-colors hover:text-stone-900 aria-[current=true]:border-sky-500 aria-[current=true]:font-medium aria-[current=true]:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 dark:aria-[current=true]:border-sky-400 dark:aria-[current=true]:text-stone-50"
+        >
+          {h.text}
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<script>
+  const OFFSET = 120;
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] a')];
+  const targets = links
+    .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+    .filter((el): el is HTMLElement => el !== null);
+
+  /** 目次がはみ出している場合、強調中の項目が見える位置まで目次だけをスクロールする。 */
+  const reveal = (link: HTMLElement) => {
+    const container = link.closest('aside');
+    if (!container) return;
+    const box = container.getBoundingClientRect();
+    const rect = link.getBoundingClientRect();
+    if (rect.top < box.top) container.scrollTop -= box.top - rect.top + 16;
+    else if (rect.bottom > box.bottom) container.scrollTop += rect.bottom - box.bottom + 16;
+  };
+
+  let scheduled = false;
+  let current = -2;
+  const update = () => {
+    scheduled = false;
+    let active = -1;
+    targets.forEach((el, i) => {
+      if (el.getBoundingClientRect().top <= OFFSET) active = i;
+    });
+    // 最後の節は見出しが上端まで届かないままページが終わるため、末尾に着いたら強調する
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) active = targets.length - 1;
+    if (active === current) return;
+    current = active;
+    links.forEach((link, i) => link.setAttribute('aria-current', String(i === active)));
+    if (links[active]) reveal(links[active]);
+  };
+
+  addEventListener(
+    'scroll',
+    () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(update);
+    },
+    { passive: true },
+  );
+  update();
+</script>

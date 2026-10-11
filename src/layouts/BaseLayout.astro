@@ -1,0 +1,94 @@
+---
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { path } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE_DESCRIPTION } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
+
+const navItems = [
+  { href: path('archive'), label: 'アーカイブ' },
+  { href: path('categories'), label: 'カテゴリ' },
+  { href: path('search'), label: '検索' },
+];
+const current = Astro.url.pathname;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        const media = matchMedia('(prefers-color-scheme: dark)');
+        const apply = () => {
+          const saved = localStorage.getItem('theme');
+          document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : media.matches);
+        };
+        apply();
+        media.addEventListener('change', apply);
+      })();
+    </script>
+  </head>
+  <body class="flex min-h-screen flex-col bg-stone-50 text-stone-800 antialiased dark:bg-stone-950 dark:text-stone-200">
+    <a
+      href="#main"
+      class="sr-only rounded-md bg-sky-600 px-3 py-2 text-sm text-white focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50"
+    >
+      本文へスキップ
+    </a>
+
+    <header class="sticky top-0 z-20 border-b border-stone-200/80 bg-stone-50/85 backdrop-blur-md dark:border-stone-800/80 dark:bg-stone-950/85">
+      <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-8 sm:px-6">
+        <a
+          href={path()}
+          class="flex shrink-0 items-center gap-2 font-bold tracking-tight whitespace-nowrap text-stone-900 dark:text-stone-50"
+        >
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width="22" height="22" class="size-[22px]" />
+          <span>Tech Briefing</span>
+        </a>
+        <nav class="flex items-center text-[13px] sm:gap-1 sm:text-sm" aria-label="メインメニュー">
+          {navItems.map((item) => (
+            <a
+              href={item.href}
+              aria-current={current.startsWith(item.href) ? 'page' : undefined}
+              class="rounded-md px-1.5 py-1.5 whitespace-nowrap text-stone-600 transition-colors hover:bg-stone-200/60 hover:text-stone-900 aria-[current=page]:font-semibold aria-[current=page]:text-stone-900 sm:px-3 dark:text-stone-400 dark:hover:bg-stone-800/60 dark:hover:text-stone-100 dark:aria-[current=page]:text-stone-50"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <div class="ml-auto">
+          <ThemeToggle client:load />
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 pt-8 pb-16 sm:px-6 sm:pt-10">
+      <slot />
+    </main>
+
+    <footer class="border-t border-stone-200 dark:border-stone-800">
+      <div class="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-xs leading-relaxed text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <p>本文は ChatGPT が Web 上の情報をもとに生成したものです。正確な内容は各リンク先で確認してください。</p>
+        <p class="shrink-0">
+          © {year} {SITE_TITLE}
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

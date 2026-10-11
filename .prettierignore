@@ -1,0 +1,5 @@
+dist/
+.astro/
+.workbench/
+pnpm-lock.yaml
+src/content/news/
