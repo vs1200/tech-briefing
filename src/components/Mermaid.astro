@@ -45,6 +45,15 @@
           lineColor: c.line,
           textColor: c.text,
           edgeLabelBackground: c.label,
+          // timeline などが使う区分ごとの配色。すべて同じ色にそろえる
+          ...Object.fromEntries(
+            Array.from({ length: 12 }, (_, i) => [
+              [`cScale${i}`, c.node],
+              [`cScaleLabel${i}`, c.text],
+              [`cScaleInv${i}`, c.border],
+              [`cScalePeer${i}`, c.border],
+            ]).flat(),
+          ),
           xyChart: {
             backgroundColor: 'transparent',
             titleColor: c.text,
