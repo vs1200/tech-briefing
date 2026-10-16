@@ -53,6 +53,30 @@ describe('ニュース Markdown の書式', () => {
       expect(headings.map((h) => h.title)).toEqual(data.items.map((item) => item.title));
     });
 
+    // 2026-10-16以降の記事に品質Gateを適用する。古いアーカイブは当時の体裁を維持する。
+    // 単に10件の見出しを並べた短報を、検証成功として公開させない。
+    if (file >= '2026-10-16.md') {
+      it('ニュース10本程度と十分な記事量を持つ', () => {
+        expect(data.items.length).toBeGreaterThanOrEqual(8);
+        expect(data.items.length).toBeLessThanOrEqual(12);
+        const fullText = readFileSync(join(NEWS_DIR, file), 'utf-8');
+        expect(fullText.length, `${file}: 記事は最低8,000文字を目安に詳しく書く`).toBeGreaterThanOrEqual(8000);
+      });
+
+      it('各ニュースに説明量・出典・開発者目線がある', () => {
+        const boundaries = [...body.matchAll(/^## \d+\. .+$/gm)];
+        expect(boundaries).toHaveLength(data.items.length);
+        for (let i = 0; i < boundaries.length; i++) {
+          const start = boundaries[i]!.index!;
+          const end = boundaries[i + 1]?.index ?? body.length;
+          const section = body.slice(start, end).split(/^---$/m)[0]!;
+          expect(section.length, `${file} の ${i + 1}本目が短すぎる`).toBeGreaterThanOrEqual(500);
+          expect(section, `${file} の ${i + 1}本目に開発者目線がない`).toContain('**開発者目線:**');
+          expect(section, `${file} の ${i + 1}本目に出典URLがない`).toMatch(/\]\(https:\/\/[^)]+\)/);
+        }
+      });
+    }
+
     it('カテゴリが定義済みのものだけ', () => {
       for (const item of data.items) {
         expect(item.categories.length).toBeGreaterThan(0);
